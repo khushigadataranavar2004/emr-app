@@ -26,7 +26,7 @@ export default function Dashboard({ auth }) {
                                         <p className="text-blue-800 font-semibold uppercase text-xs tracking-wider">Total Patients</p>
                                         <span className="bg-blue-200 text-blue-800 text-xs px-2 py-1 rounded-full">Live</span>
                                     </div>
-                                    <p className="text-3xl font-bold text-blue-900 mt-2">128</p>
+                                    <p className="text-3xl font-bold text-blue-900 mt-2">150</p>
                                 </div>
 
                                 <div className="bg-emerald-50 p-6 rounded-xl border border-emerald-200 shadow-sm">
