@@ -18,9 +18,27 @@ jobs:
           username: ${{ secrets.AWS_USERNAME }}
           key: ${{ secrets.AWS_SSH_KEY }}
           script: |
+            # 1. System & Dependencies Update (Infrastructure as Code)
+            # This ensures Nginx, PHP 8.2, and MongoDB drivers are present
+            sudo apt-get update -y
+            sudo apt-get install -y nginx php8.2-fpm php8.2-mbstring php8.2-xml php8.2-bcmath php8.2-curl php-mongodb
+
+            # 2. Navigate to project
             cd /var/www/html/emr-app
+            
+            # 3. Pull latest code
             git pull origin main
+            
+            # 4. Install PHP & JS dependencies
             composer install --no-dev --optimize-autoloader
             npm install
             npm run build
+            
+            # 5. Database & Optimization
             php artisan migrate --force
+            php artisan config:cache
+            php artisan route:cache
+
+            # 6. Restart PHP-FPM to apply any new PHP extension changes
+            sudo systemctl restart php8.2-fpm
+            
