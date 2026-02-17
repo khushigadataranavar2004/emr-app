@@ -40,5 +40,4 @@ jobs:
             php artisan route:cache
 
             # 6. Restart PHP-FPM to apply any new PHP extension changes
-            sudo systemctl restart php8.2-fpm
-            
+            sudo systemctl restart php*-fpm
