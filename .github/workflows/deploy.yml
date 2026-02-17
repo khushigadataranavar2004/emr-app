@@ -31,8 +31,7 @@ jobs:
             fi
 
             # 3. Install PHP and MongoDB driver
-            sudo apt-get install -y php8.2-fpm php8.2-curl php8.2-mongodb php8.2-mbstring php8.2-xml php8.2-bcmath
-            
+            sudo apt-get install -y php8.3-fpm php8.3-curl php8.3-mongodb php8.3-mbstring php8.3-xml php8.3-bcmath
             # 4. Deployment logic
             cd /var/www/html/emr-app
             git pull origin main
@@ -48,4 +47,4 @@ jobs:
             # 6. Final Service Restart
             # Ensures the webserver is ON and PHP knows about the new MongoDB driver
             sudo systemctl start nginx
-            sudo systemctl restart php8.2-fpm || sudo systemctl restart php*-fpm
+            sudo systemctl restart php8.3-fpm || sudo systemctl restart php8.3-fpm
