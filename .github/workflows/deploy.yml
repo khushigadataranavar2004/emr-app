@@ -2,7 +2,7 @@ name: Deploy Laravel EMR to AWS
 
 on:
   push:
-    branches: [ main ] # This triggers whenever you "git push"
+    branches: [ main ]
 
 jobs:
   deploy:
@@ -18,11 +18,12 @@ jobs:
           username: ${{ secrets.AWS_USERNAME }}
           key: ${{ secrets.AWS_SSH_KEY }}
           script: |
-            # 1. Update package lists
+            # ==========================================================
+            # PHASE 1: PRE-INSTALLATION (Environment Provisioning)
+            # ==========================================================
             sudo apt-get update --fix-missing -y
             
-            # 2. Install Nginx and all Sir's requested PHP libraries
-            # Includes: curl, xml, pear, mongodb, dev, gd + essentials
+            # Installing Nginx and the exact PHP library stack requested by Sir
             sudo apt-get install -y nginx \
                                    php8.3-fpm \
                                    php8.3-curl \
@@ -36,34 +37,39 @@ jobs:
                                    php8.3-zip \
                                    --install-recommends
 
-            # 3. Deployment logic
+            # ==========================================================
+            # PHASE 2: INSTALLATION (Code Sync & Dependencies)
+            # ==========================================================
             cd /var/www/html/emr-app
             git pull origin main
             
-            # Fix permissions before running commands to avoid 'Permission Denied'
+            # Align ownership so ubuntu user can manage files
             sudo chown -R ubuntu:www-data /var/www/html/emr-app
             
-            # Install PHP dependencies
+            # Install Backend and Frontend dependencies
             composer install --no-dev --optimize-autoloader --no-interaction
-
-            # Install Frontend dependencies and fix Vite execution permissions
             npm install
+
+            # ==========================================================
+            # PHASE 3: POST-INSTALLATION (Optimization & Hardening)
+            # ==========================================================
+            
+            # 1. Unlock Vite permissions and build production assets
             sudo chmod -R +x node_modules/.bin
             npm run build
             
-            # 4. Laravel Optimization & Environment setup
-            # Ensures the app is using the latest config and DB schema
+            # 2. Database and Cache Warming
             php artisan migrate --force
             php artisan config:cache
             php artisan route:cache
             php artisan view:cache
 
-            # 5. Final Permission Alignment
-            # Ensures the webserver (www-data) can write to storage and logs
+            # 3. Security Hardening: Recursive Permission Alignment
+            # Ensures the webserver (www-data) has write access to necessary folders
             sudo chmod -R 775 storage bootstrap/cache
             sudo chown -R www-data:www-data storage bootstrap/cache
 
-            # 6. Final Service Restart
-            # Refreshes Nginx and PHP-FPM to recognize new libraries/drivers
+            # 4. Final Service Lifecycle Restart
+            # Ensures new PHP extensions (MongoDB, GD) are fully loaded
             sudo systemctl restart nginx
             sudo systemctl restart php8.3-fpm
