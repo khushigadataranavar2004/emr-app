@@ -16,7 +16,7 @@ export default function Dashboard({ auth }) {
                             {/* Welcome Message */}
                             <div className="mb-8">
                                 <h3 className="text-2xl font-bold text-indigo-700">Welcome, Dr. {auth.user.name}</h3>
-                                <p className="text-gray-600">Good Evening sir today. How are you. This update was deployed successfully via CI/CD Pipeline.</p>
+                                <p className="text-gray-600">Good Morning Khushi. How are you. This update was deployed successfully via CI/CD Pipeline.</p>
                             </div>
                             
                             {/* EMR Statistics Grid */}
