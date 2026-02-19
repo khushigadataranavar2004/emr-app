@@ -19,11 +19,21 @@ jobs:
           key: ${{ secrets.AWS_SSH_KEY }}
           script: |
             # ==========================================================
-            # PHASE 1: PRE-INSTALLATION (Environment Provisioning)
+            # PHASE 1: PRE-INSTALLATION (Sanitization & Provisioning)
             # ==========================================================
+            
+            # 1. PURGE: Remove old versions to prevent dependency conflicts
+            # This ensures a "Clean Slate" as requested by Sir.
+            sudo apt-get purge -y php8.1* php8.2*
+            
+            # 2. AUTO-CLEAN: Remove unused packages and clear the cache
+            sudo apt-get autoremove -y
+            sudo apt-get autoclean
+            
+            # 3. UPDATE: Refresh package lists
             sudo apt-get update --fix-missing -y
             
-            # Installing Nginx and the exact PHP library stack requested by Sir
+            # 4. INSTALL: Provision Nginx and the exact PHP 8.3 library stack
             sudo apt-get install -y nginx \
                                    php8.3-fpm \
                                    php8.3-curl \
@@ -65,11 +75,9 @@ jobs:
             php artisan view:cache
 
             # 3. Security Hardening: Recursive Permission Alignment
-            # Ensures the webserver (www-data) has write access to necessary folders
             sudo chmod -R 775 storage bootstrap/cache
             sudo chown -R www-data:www-data storage bootstrap/cache
 
             # 4. Final Service Lifecycle Restart
-            # Ensures new PHP extensions (MongoDB, GD) are fully loaded
             sudo systemctl restart nginx
             sudo systemctl restart php8.3-fpm
